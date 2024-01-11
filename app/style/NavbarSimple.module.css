@@ -143,6 +143,8 @@
   align-items: flex-start;
   width: calc(100% - 18.75rem * var(--mantine-scale));
   margin-left: calc(18.75rem * var(--mantine-scale));
+  background: linear-gradient(90deg, #ffffff 0%, #91cafd 100%);
+  min-height: 100vh;
 }
 
 .burger {
