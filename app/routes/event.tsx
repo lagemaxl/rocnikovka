@@ -45,7 +45,7 @@ function formatDate(dateStr: string): string {
 async function getEvent(eventId: string): Promise<Event | null> {
   try {
     const res = await fetch(
-      `https://rocnikovka2.pockethost.io/api/collections/events/records/${eventId}`,
+      `http://127.0.0.1:8090/api/collections/events/records/${eventId}`,
       { cache: "no-store" }
     );
     if (!res.ok) {
@@ -93,7 +93,7 @@ export default function EventDetails() {
 
   let imageUrls = [];
 for (let i = 0; i < event.image.length; i++) {
-    imageUrls.push(`https://rocnikovka2.pockethost.io/api/files/${event.collectionId}/${event.id}/${event.image[i]}`);
+    imageUrls.push(`http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[i]}`);
 }
 
   const slides = imageUrls.map((image) => (

@@ -56,7 +56,7 @@ export default function NavbarSimple() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://rocnikovka2.pockethost.io/api/collections/users/records/${pb?.authStore?.model?.id}`
+          `http://127.0.0.1:8090/api/collections/users/records/${pb?.authStore?.model?.id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -70,7 +70,7 @@ export default function NavbarSimple() {
     fetchData();
   }, [pb.authStore.isValid]);
 
-  const avatarURL = `https://rocnikovka2.pockethost.io/api/files/_pb_users_auth_/${dataUser?.id}/${dataUser?.avatar}`;
+  const avatarURL = `http://127.0.0.1:8090/api/files/_pb_users_auth_/${dataUser?.id}/${dataUser?.avatar}`;
 
   useEffect(() => {
     if (!pb.authStore.isValid) {

@@ -43,7 +43,7 @@ interface UserData {
 async function getEvents(): Promise<Event[]> {
   try {
     const res = await fetch(
-      "https://rocnikovka2.pockethost.io/api/collections/events/records/",
+      "http://127.0.0.1:8090/api/collections/events/records/",
       { cache: "no-store" }
     );
     if (!res.ok) {
@@ -84,9 +84,9 @@ export default function Home() {
 export function EventCard({ event }: { event: Event }) {
   let imageUrls = [];
   for (let i = 0; i < event.image.length; i++) {
-      imageUrls.push(`https://rocnikovka2.pockethost.io/api/files/${event.collectionId}/${event.id}/${event.image[i]}`);
+      imageUrls.push(`http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[i]}`);
   }
-  const image = `https://rocnikovka2.pockethost.io/api/files/${event.collectionId}/${event.id}/${event.image[0]}`;
+  const image = `http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[0]}`;
   const [loading2, setLoading2] = useState<boolean>(true);
   const [dataUser, setDataUser] = useState<UserData | null>(null);
 
@@ -103,7 +103,7 @@ export function EventCard({ event }: { event: Event }) {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://rocnikovka2.pockethost.io/api/collections/users/records/${pb?.authStore?.model?.id}`
+          `http://127.0.0.1:8090/api/collections/users/records/${pb?.authStore?.model?.id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -123,7 +123,7 @@ export function EventCard({ event }: { event: Event }) {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://rocnikovka2.pockethost.io/api/collections/events/records/${event.id}`
+          `http://127.0.0.1:8090/api/collections/events/records/${event.id}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -155,7 +155,7 @@ export function EventCard({ event }: { event: Event }) {
     await pb.collection("events").update(eventId, data);
     try {
       const response = await fetch(
-        `https://rocnikovka2.pockethost.io/api/collections/events/records/${eventId}`
+        `http://127.0.0.1:8090/api/collections/events/records/${eventId}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
