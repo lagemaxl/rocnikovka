@@ -148,7 +148,7 @@ export function EventCard({ event }: { event: Event }) {
   const handleJoinEvent = async (eventId: string) => {
     setLoading2(true);
     if (isUserInEvent) {
-      data.users = eventUsers.users.filter((user) => user !== dataUser?.id);
+      data.users = eventUsers.users.filter((user) => user !== dataUser?.id); 
     } else {
       data.users = [dataUser?.id ?? "", ...eventUsers.users];
     }
@@ -161,11 +161,16 @@ export function EventCard({ event }: { event: Event }) {
         throw new Error("Network response was not ok");
       }
       const jsonData = await response.json();
-      setEventUsers(jsonData); // Update the event users state
+      setEventUsers(jsonData);
       setLoading2(false);
     } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
+      console.error("Error:", error);
     }
+  };
+
+
+  const handleEditEvent = async (eventId: string) => {
+    navigate(`/app/new?id=${eventId}`)
   };
 
   const navigate = useNavigate();
@@ -208,7 +213,7 @@ export function EventCard({ event }: { event: Event }) {
       </div>
       <div className={classes.buttons}>
         {isUserOwner ? (
-          <button className={classes.buttonjoin}>Editovat</button>
+          <button className={classes.buttonjoin} onClick={() => handleEditEvent(event.id)}>Editovat</button>
         ) : !loading2 ? (
           isUserInEvent ? (
             <button

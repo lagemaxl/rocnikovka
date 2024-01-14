@@ -154,12 +154,13 @@ const AuthenticationImage: React.FC = () => {
     try {
       console.log("Registering user", formData);
       const record = await pb.collection("users").create(formData);
-
       console.log("Registration successful");
       navigate("/login");
     } catch (error) {
       console.error("Registration failed", error);
     }
+
+    
   };
 
   const isValidEmail = (email: string): boolean => {

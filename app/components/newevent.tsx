@@ -5,7 +5,7 @@ import classes from "~/style/NewEvent.module.css";
 import pb from "../lib/pocketbase";
 import "@mantine/dates/styles.css";
 import "leaflet/dist/leaflet.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // Dynamic imports for Leaflet components
 let MapContainer: typeof import("react-leaflet")["MapContainer"];
@@ -42,8 +42,41 @@ type ValidationErrors = {
   image: string;
 };
 
+async function getEvent(eventId: string): Promise<Event | null> {
+  try {
+    const res = await fetch(
+      `http://127.0.0.1:8090/api/collections/events/records/${eventId}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) {
+      throw new Error(`Error: ${res.status}`);
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch event:", error);
+    return null;
+  }
+}
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 export default function NewEvent() {
   const navigate = useNavigate();
+  const query = useQuery();
+  const [event, setEvent] = useState<Event | null>(null);
+
+  useEffect(() => {
+    const eventId = query.get("id");
+    if (eventId) {
+      getEvent(eventId).then(setEvent);
+    }
+  }, []);
+
+  console.log(event);
+
   const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
