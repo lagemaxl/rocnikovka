@@ -78,25 +78,26 @@ export default function NewEvent() {
   const navigate = useNavigate();
   const query = useQuery();
   const [event, setEvent] = useState<Event | null>(null);
+  const [editing, setEditing] = useState<boolean>(false);
 
   const [formData, setFormData] = useState<FormData>({
     title: "okokokoko",
-    description: "",
+    description: "vbnnm",
     image: [],
-    from_date: null,
-    to_date: null,
-    place: "",
-    owner: pb.authStore.model?.id,
+    from_date: new Date("2024-01-26T00:00:00+0100"),
+    to_date: new Date("2024-01-31T00:00:00+0100"),
+    place: "bnm",
+    owner: pb.authStore.model?.id || "",
     location: [50.6594, 14.0416],
   });
   const [isFormValid, setIsFormValid] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({
-    title: '',
-    description: '',
-    from_date: '',
-    to_date: '',
-    place: '',
-    image: '',
+    title: "",
+    description: "",
+    from_date: "",
+    to_date: "",
+    place: "",
+    image: "",
   });
 
   useEffect(() => {
@@ -105,45 +106,65 @@ export default function NewEvent() {
       getEvent(eventId).then((fetchedEvent) => {
         if (fetchedEvent) {
           setEvent(fetchedEvent);
-          setFormData({ 
-            title: fetchedEvent?.title ?? '',
-            description: fetchedEvent?.description ?? '',
+          setEditing(true);
+          setFormData({
+            title: fetchedEvent.title || "",
+            description: fetchedEvent.description || "",
             image: [],
-            from_date: fetchedEvent?.from_date ? new Date(fetchedEvent.from_date) : null,
-            to_date: fetchedEvent?.to_date ? new Date(fetchedEvent.to_date) : null,
-            place: fetchedEvent?.place ?? '',
-            owner: fetchedEvent?.owner ?? pb.authStore.model?.id,
-            location: fetchedEvent?.location || [50.6594, 14.0416]
+            from_date: fetchedEvent.from_date
+              ? new Date(fetchedEvent.from_date)
+              : null,
+            to_date: fetchedEvent.to_date
+              ? new Date(fetchedEvent.to_date)
+              : null,
+            place: fetchedEvent.place || "",
+            owner: fetchedEvent.owner || pb.authStore.model?.id || "",
+            location: fetchedEvent.location || [50.6594, 14.0416],
           });
         }
       });
     }
   }, []);
-  
-  const validateTitle = (title: string) => title.length >= 3 && title.length <= 20;
-  const validateDescription = (description: string) =>description.length >0 && description.length <= 300;
-  const validateFromDate = (fromDate: Date | null) => fromDate && fromDate > new Date();
-  const validateToDate = (toDate: Date | null, fromDate: Date | null) => toDate && fromDate && toDate > fromDate;
-  const validatePlace = (place: string) => place.length >= 3 && place.length <= 20;
-  const validateImage = (image: File[]) => image.length > 0 && image.length <= 20;
 
-  const handleChange = (field: keyof FormData) => (value: string | Date | File[] | null) => {
-    setFormData({ ...formData, [field]: value });
-    console.log(formData);
-  };
+  const validateTitle = (title: string) =>
+    title.length >= 3 && title.length <= 20;
+  const validateDescription = (description: string) =>
+    description.length > 0 && description.length <= 2000;
+  const validateFromDate = (fromDate: Date | null) =>
+    fromDate && fromDate > new Date();
+  const validateToDate = (toDate: Date | null, fromDate: Date | null) =>
+    toDate && fromDate && toDate > fromDate;
+  const validatePlace = (place: string) =>
+    place.length >= 3 && place.length <= 20;
+  const validateImage = (image: File[]) =>
+    image.length > 0 && image.length <= 20;
+
+  const handleChange =
+    (field: keyof FormData) => (value: string | Date | File[] | null) => {
+      setFormData({ ...formData, [field]: value });
+      console.log(formData);
+    };
 
   const validateForm = () => {
     const errors: ValidationErrors = {
-      title: validateTitle(formData.title) ? '' : 'Název musí mít 3-20 znaků.',
-      description: validateDescription(formData.description) ? '' : 'Popis musí mít 1-300 znaků.',
-      image: validateImage(formData.image) ? '' : 'Musíte vybrat alespoň jeden obrázek. (max 20)',
-      from_date: validateFromDate(formData.from_date) ? '' : 'Událost musí začínat v budoucnu',
-      to_date: validateToDate(formData.to_date, formData.from_date) ? '' : 'Konec události musí být po jejím začátku',
-      place: validatePlace(formData.place) ? '' : 'Místo musí mít 3-20 znaků.',
+      title: validateTitle(formData.title) ? "" : "Název musí mít 3-20 znaků.",
+      description: validateDescription(formData.description)
+        ? ""
+        : "Popis musí mít 1-2000 znaků.",
+      image: validateImage(formData.image)
+        ? ""
+        : "Musíte vybrat alespoň jeden obrázek. (max 20)",
+      from_date: validateFromDate(formData.from_date)
+        ? ""
+        : "Událost musí začínat v budoucnu",
+      to_date: validateToDate(formData.to_date, formData.from_date)
+        ? ""
+        : "Konec události musí být po jejím začátku",
+      place: validatePlace(formData.place) ? "" : "Místo musí mít 3-20 znaků.",
     };
     setValidationErrors(errors);
 
-    const isValid = Object.values(errors).every((error) => error === '');
+    const isValid = Object.values(errors).every((error) => error === "");
     setIsFormValid(isValid);
   };
 
@@ -165,14 +186,13 @@ export default function NewEvent() {
       data.append("owner", pb.authStore.model.id);
     }
 
-    if (formData.image) {
-      formData.image.forEach((file, index) =>
-        data.append(`image`, file, file.name)
-      );
+    if (formData.image.length > 0) {
+      formData.image.forEach((image, index) => {
+        data.append(`image`, image);
+      });
     }
-    
-    data.append("location", JSON.stringify(formData.location));
 
+    data.append("location", JSON.stringify(formData.location));
     try {
       const record = await pb.collection("events").create(data);
       navigate("/app/home");
@@ -224,15 +244,24 @@ export default function NewEvent() {
             }
           />
           <FileInput
-
             label="Obrázky"
             placeholder="Nahrajte obrázky události"
             className={classes.input}
             multiple
             onChange={(files: File[] | null) => handleChange("image")(files)}
+            //accept=".jpg, .jpeg, .png" // Add the accepted file formats here
           />
-          <DateTimePicker
+          {formData.image.map((file, index) => (
+            <div key={index}>
+              <img
+                src={URL.createObjectURL(file)}
+                className={classes.smallimg}
+                alt={`Image ${index}`}
+              />
+            </div>
+          ))}
 
+          <DateTimePicker
             valueFormat="YYYY-MM-DD HH:mm:ss"
             label="Od"
             placeholder="Vyberte datum a čas začátku události"
@@ -241,7 +270,6 @@ export default function NewEvent() {
             onChange={(date: Date | null) => handleChange("from_date")(date)}
           />
           <DateTimePicker
-
             valueFormat="YYYY-MM-DD HH:mm:ss"
             label="Do"
             placeholder="Vyberte datum a čas konce události"
@@ -250,7 +278,6 @@ export default function NewEvent() {
             onChange={(date: Date | null) => handleChange("to_date")(date)}
           />
           <TextInput
-     
             label="Místo"
             placeholder="Napište místo konání události"
             value={formData.place}
@@ -262,12 +289,15 @@ export default function NewEvent() {
           <Button type="submit" className={classes.input}>
             Přidat událost
           </Button>
-          {Object.keys(validationErrors).map((key) => (
-          validationErrors[key as keyof ValidationErrors] && 
-          <p style={{color: 'red'}}>{validationErrors[key as keyof ValidationErrors]}</p>
-        ))}
+          {Object.keys(validationErrors).map(
+            (key) =>
+              validationErrors[key as keyof ValidationErrors] && (
+                <p style={{ color: "red" }}>
+                  {validationErrors[key as keyof ValidationErrors]}
+                </p>
+              )
+          )}
         </form>
-
       </div>
       <div className={classes.container}>
         {typeof window !== "undefined" && (
