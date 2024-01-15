@@ -10,7 +10,6 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-
 interface Event {
   id: string;
   title: string;
@@ -92,9 +91,11 @@ export default function EventDetails() {
   console.log(event.location);
 
   let imageUrls = [];
-for (let i = 0; i < event.image.length; i++) {
-    imageUrls.push(`http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[i]}`);
-}
+  for (let i = 0; i < event.image.length; i++) {
+    imageUrls.push(
+      `http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[i]}`
+    );
+  }
 
   const slides = imageUrls.map((image) => (
     <Carousel.Slide key={image}>
@@ -120,29 +121,29 @@ for (let i = 0; i < event.image.length; i++) {
       >
         {slides}
       </Carousel>
-      <div className={classes.container}>
         <div className={classes.text}>
-          <h1>{event.title}</h1>
+          <h3>{formatDate(event.from_date)} - {formatDate(event.to_date)}</h3>
+          <h1 className={classes.eventtitle} >{event.title}</h1>
           <p>{event.description}</p>
           <p>{event.place}</p>
-          {formatDate(event.from_date)} - {formatDate(event.to_date)}
+          <div className={classes.map}>
+            {typeof window !== "undefined" && (
+              <MapContainer
+                center={[50.6594, 14.0416]}
+                zoom={13}
+                className={classes.map}
+                style={{ height: "100%", width: "100%" }}
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <Marker
+                  position={[event.location[0], event.location[1]]}
+                  interactive={false}
+                />
+                ;
+              </MapContainer>
+            )}
+          </div>
         </div>
-
-        <div className={classes.map}>
-          {typeof window !== "undefined" && (
-            <MapContainer
-              center={[50.6594, 14.0416]}
-              zoom={13}
-              className={classes.map}
-              style={{ height: "100%", width: "100%" }}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[event.location[0], event.location[1]]} interactive={false} />;
-            </MapContainer>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
-

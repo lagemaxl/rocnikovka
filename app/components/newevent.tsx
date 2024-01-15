@@ -42,6 +42,17 @@ type ValidationErrors = {
   image: string;
 };
 
+type Event = {
+  title: string;
+  description: string;
+  image: string;
+  from_date: Date | null;
+  to_date: Date | null;
+  place: string;
+  owner: string;
+  location: [number, number];
+};
+
 async function getEvent(eventId: string): Promise<Event | null> {
   try {
     const res = await fetch(
@@ -68,23 +79,14 @@ export default function NewEvent() {
   const query = useQuery();
   const [event, setEvent] = useState<Event | null>(null);
 
-  useEffect(() => {
-    const eventId = query.get("id");
-    if (eventId) {
-      getEvent(eventId).then(setEvent);
-    }
-  }, []);
-
-  console.log(event);
-
   const [formData, setFormData] = useState<FormData>({
-    title: "",
+    title: "okokokoko",
     description: "",
     image: [],
     from_date: null,
     to_date: null,
     place: "",
-    owner: "",
+    owner: pb.authStore.model?.id,
     location: [50.6594, 14.0416],
   });
   const [isFormValid, setIsFormValid] = useState(false);
@@ -97,6 +99,27 @@ export default function NewEvent() {
     image: '',
   });
 
+  useEffect(() => {
+    const eventId = query.get("id");
+    if (eventId) {
+      getEvent(eventId).then((fetchedEvent) => {
+        if (fetchedEvent) {
+          setEvent(fetchedEvent);
+          setFormData({ 
+            title: fetchedEvent?.title ?? '',
+            description: fetchedEvent?.description ?? '',
+            image: [],
+            from_date: fetchedEvent?.from_date ? new Date(fetchedEvent.from_date) : null,
+            to_date: fetchedEvent?.to_date ? new Date(fetchedEvent.to_date) : null,
+            place: fetchedEvent?.place ?? '',
+            owner: fetchedEvent?.owner ?? pb.authStore.model?.id,
+            location: fetchedEvent?.location || [50.6594, 14.0416]
+          });
+        }
+      });
+    }
+  }, []);
+  
   const validateTitle = (title: string) => title.length >= 3 && title.length <= 20;
   const validateDescription = (description: string) =>description.length >0 && description.length <= 300;
   const validateFromDate = (fromDate: Date | null) => fromDate && fromDate > new Date();
@@ -106,6 +129,7 @@ export default function NewEvent() {
 
   const handleChange = (field: keyof FormData) => (value: string | Date | File[] | null) => {
     setFormData({ ...formData, [field]: value });
+    console.log(formData);
   };
 
   const validateForm = () => {
