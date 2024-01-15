@@ -5,8 +5,8 @@ export default {
     return defineRoutes((route) => {
       route("/app", "routes/app.tsx", () => {
         route("home", "routes/Home.tsx", { index: true });
-        route("new", "components/newevent.tsx", { index: true });
-        route("event", "routes/event.tsx", { index: true });
+        route("new", "components/newevent.client.tsx", { index: true });
+        route("event", "routes/event.client.tsx", { index: true });
         route("profile", "routes/profile.tsx", { index: true });
       });
     });

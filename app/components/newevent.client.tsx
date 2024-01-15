@@ -6,6 +6,9 @@ import pb from "../lib/pocketbase";
 import "@mantine/dates/styles.css";
 import "leaflet/dist/leaflet.css";
 import { useNavigate, useLocation } from "react-router-dom";
+import L from 'leaflet';
+import "leaflet/dist/images/marker-shadow.png";
+
 
 // Dynamic imports for Leaflet components
 let MapContainer: typeof import("react-leaflet")["MapContainer"];
@@ -202,6 +205,7 @@ export default function NewEvent() {
     }
   };
 
+ 
   useEffect(() => {
     if (typeof window !== "undefined") {
       require("leaflet/dist/leaflet.css");
@@ -217,8 +221,16 @@ export default function NewEvent() {
 
     console.log(formData.location);
 
+    const customIcon = L.icon({
+      iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
+      iconSize: [32, 32], // Specify the size of your custom icon
+      iconAnchor: [16, 32], // Specify the anchor point of your custom icon
+    });
+    
+    
+
     return formData.location ? (
-      <Marker position={formData.location} interactive={false} />
+      <Marker position={formData.location} interactive={false} icon={customIcon}/>
     ) : null;
   };
 

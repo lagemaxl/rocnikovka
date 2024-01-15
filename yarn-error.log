@@ -1,20 +1,20 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add @mantine/core @mantine/hooks @mantine/carousel embla-carousel-react
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add react react-dom leaflet
 
 PATH: 
-  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Eclipse Foundation\jdk-8.0.302.8-hotspot\bin;C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin;C:\Program Files\dotnet\;C:\Windows\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\QuickTime\QTSystem\;C:\Program Files\PuTTY\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\TortoiseGit\bin;C:\Program Files\Git\cmd;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\nodejs\;C:\Users\ladik\AppData\Local\Microsoft\WindowsApps;C:\Users\ladik\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\ladik\.dotnet\tools;C:\Users\ladik\AppData\Local\GitHubDesktop\bin;C:\Program Files (x86)\Nmap;C:\Users\ladik\AppData\Local\Yarn\bin;C:\Users\ladik\.dotnet\tools;C:\Users\ladik\AppData\Local\Programs\Microsoft VS Code Insiders\bin;C:\Users\ladik\AppData\Roaming\npm
+  C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\Git\cmd;C:\Users\ladik\AppData\Local\Microsoft\WindowsApps;C:\Users\ladik\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\ladik\AppData\Roaming\npm;C:\Users\ladik\AppData\Local\Yarn\bin;C:\Users\ladik\AppData\Local\GitHubDesktop\bin
 
 Yarn version: 
   1.22.19
 
 Node version: 
-  20.10.0
+  20.11.0
 
 Platform: 
   win32 x64
 
 Trace: 
-  Error: EPERM: operation not permitted, unlink 'D:\Programming\Ročníková práce\rocnikova_prace\node_modules\@esbuild\win32-x64\esbuild.exe'
+  Error: EPERM: operation not permitted, unlink 'D:\Programming\Ročníková práce\rocnikovka\node_modules\@esbuild\win32-x64\esbuild.exe'
 
 npm manifest: 
   {

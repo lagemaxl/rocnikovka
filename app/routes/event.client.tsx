@@ -4,6 +4,8 @@ import classes from "~/style/Event.module.css";
 import { Image } from "@mantine/core";
 import { Carousel } from "@mantine/carousel";
 import "@mantine/carousel/styles.css";
+import L from 'leaflet';
+
 
 // Helper function to parse query parameters
 function useQuery() {
@@ -103,6 +105,12 @@ export default function EventDetails() {
     </Carousel.Slide>
   ));
 
+  const customIcon = L.icon({
+    iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
+    iconSize: [32, 32], // Specify the size of your custom icon
+    iconAnchor: [16, 32], // Specify the anchor point of your custom icon
+  });
+
   return (
     <div className={classes.content}>
       <Carousel
@@ -138,6 +146,7 @@ export default function EventDetails() {
                 <Marker
                   position={[event.location[0], event.location[1]]}
                   interactive={false}
+                  icon={customIcon}
                 />
                 ;
               </MapContainer>
