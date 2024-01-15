@@ -4,8 +4,8 @@ import classes from "~/style/Event.module.css";
 import { Image } from "@mantine/core";
 import { Carousel } from "@mantine/carousel";
 import "@mantine/carousel/styles.css";
-import L from 'leaflet';
-
+import L from "leaflet";
+import { IconMapPin, IconCalendarEvent } from "@tabler/icons-react";
 
 // Helper function to parse query parameters
 function useQuery() {
@@ -106,7 +106,8 @@ export default function EventDetails() {
   ));
 
   const customIcon = L.icon({
-    iconUrl: 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png',
+    iconUrl:
+      "https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png",
     iconSize: [32, 32], // Specify the size of your custom icon
     iconAnchor: [16, 32], // Specify the anchor point of your custom icon
   });
@@ -129,30 +130,37 @@ export default function EventDetails() {
       >
         {slides}
       </Carousel>
-        <div className={classes.text}>
-          <h3>{formatDate(event.from_date)} - {formatDate(event.to_date)}</h3>
-          <h1 className={classes.eventtitle} >{event.title}</h1>
-          <p>{event.description}</p>
-          <p>{event.place}</p>
-          <div className={classes.map}>
-            {typeof window !== "undefined" && (
-              <MapContainer
-                center={[50.6594, 14.0416]}
-                zoom={13}
-                className={classes.map}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Marker
-                  position={[event.location[0], event.location[1]]}
-                  interactive={false}
-                  icon={customIcon}
-                />
-                ;
-              </MapContainer>
-            )}
+      <div className={classes.text}>
+        <h3>
+          {formatDate(event.from_date)} - {formatDate(event.to_date)}
+        </h3>
+        <div className={classes.row}>
+          <h1 className={classes.eventtitle}>{event.title}</h1>
+          <div className={classes.eventcard}>
+            <IconMapPin />
+            {event.place}
           </div>
         </div>
+        <p>{event.description}</p>
+        <div className={classes.map}>
+          {typeof window !== "undefined" && (
+            <MapContainer
+              center={[50.6594, 14.0416]}
+              zoom={13}
+              className={classes.map}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker
+                position={[event.location[0], event.location[1]]}
+                interactive={false}
+                icon={customIcon}
+              />
+              ;
+            </MapContainer>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

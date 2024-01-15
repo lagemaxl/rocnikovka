@@ -42,12 +42,6 @@
   object-fit: cover;
 }
 
-.card:hover .image{
-  //transform: scale(1.2); /* Změnit pozici obrázku na hover */
-}
-
-
-
 h1 {
   font-size: 1.3rem;
 }
@@ -111,7 +105,16 @@ p {
     .buttonjoinNO:hover {
       background-color: white;
       color: red;
-      border: 1px solid red;
+      border: 1px
+       solid red;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 2em;
+      width: 100%;
     }
     
     .buttonabout {

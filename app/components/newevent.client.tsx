@@ -107,26 +107,35 @@ export default function NewEvent() {
     if (eventId) {
       getEvent(eventId).then((fetchedEvent) => {
         if (fetchedEvent) {
-          setEvent(fetchedEvent);
-          setEditing(true);
-          setFormData({
-            title: fetchedEvent.title || "",
-            description: fetchedEvent.description || "",
-            image: [],
-            from_date: fetchedEvent.from_date
-              ? new Date(fetchedEvent.from_date)
-              : null,
-            to_date: fetchedEvent.to_date
-              ? new Date(fetchedEvent.to_date)
-              : null,
-            place: fetchedEvent.place || "",
-            owner: fetchedEvent.owner || pb.authStore.model?.id || "",
-            location: fetchedEvent.location || [50.6594, 14.0416],
-          });
+          // Check if the logged-in user's ID matches the event's owner ID
+          const loggedInUserId = pb.authStore.model?.id;
+          if (loggedInUserId && loggedInUserId === fetchedEvent.owner) {
+            setEvent(fetchedEvent);
+            setEditing(true);
+            setFormData({
+              title: fetchedEvent.title || "",
+              description: fetchedEvent.description || "",
+              image: [],
+              from_date: fetchedEvent.from_date
+                ? new Date(fetchedEvent.from_date)
+                : null,
+              to_date: fetchedEvent.to_date
+                ? new Date(fetchedEvent.to_date)
+                : null,
+              place: fetchedEvent.place || "",
+              owner: fetchedEvent.owner || pb.authStore.model?.id || "",
+              location: fetchedEvent.location || [50.6594, 14.0416],
+            });
+          } else {
+            // Handle the case where the logged-in user is not the owner of the event
+            // Redirect to an appropriate page or display a message
+            navigate("/app/home"); // Redirect to the home page
+          }
         }
       });
     }
   }, []);
+  
 
   const validateTitle = (title: string) =>
     title.length >= 3 && title.length <= 20;
@@ -241,6 +250,18 @@ export default function NewEvent() {
     ) : null;
   };
 
+  const handleDeleteEvent = async () => {
+    if (editing) {
+      const eventId = query.get("id");
+      try {
+        await pb.collection("events").delete(eventId || "");
+        navigate("/app/home");
+      } catch (error) {
+        console.error("Failed to delete event:", error);
+      }
+    }
+  };
+
   return (
     <div className={classes.content}>
       <div className={classes.container}>
@@ -270,15 +291,15 @@ export default function NewEvent() {
             onChange={(files: File[] | null) => handleChange("image")(files)}
             //accept=".jpg, .jpeg, .png" // Add the accepted file formats here
           />
-          {formData.image.map((file, index) => (
-            <div key={index}>
+          <div className={classes.smallimages}>
+            {formData.image.map((file, index) => (
               <img
                 src={URL.createObjectURL(file)}
                 className={classes.smallimg}
                 alt={`Image ${index}`}
               />
-            </div>
-          ))}
+            ))}
+          </div>
 
           <DateTimePicker
             valueFormat="YYYY-MM-DD HH:mm:ss"
@@ -306,9 +327,20 @@ export default function NewEvent() {
             }
           />
           {editing ? (
-            <Button type="submit" className={classes.input}>
-              Uložit změny
-            </Button>
+            <div className={classes.row}>
+              <Button
+                type="submit"
+                className={`${classes.input} ${classes.buttonjoin}`}
+              >
+                Uložit změny
+              </Button>
+              <Button
+                onClick={handleDeleteEvent}
+                className={`${classes.input} ${classes.buttonjoinNO}`}
+              >
+                Smazat událost
+              </Button>
+            </div>
           ) : (
             <Button type="submit" className={classes.input}>
               Přidat událost
