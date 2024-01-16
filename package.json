@@ -36,6 +36,7 @@
     "@tiptap/react": "^2.1.15",
     "@tiptap/starter-kit": "^2.1.15",
     "aos": "^2.3.4",
+    "date-fns": "^3.2.0",
     "dayjs": "^1.11.10",
     "embla-carousel-react": "^7.1.0",
     "isbot": "^3.6.8",

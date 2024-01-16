@@ -7,6 +7,7 @@ import "@mantine/dates/styles.css";
 import "leaflet/dist/leaflet.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import L from "leaflet";
+import 'dayjs/locale/cs';
 import "leaflet/dist/images/marker-shadow.png";
 
 // Dynamic imports for Leaflet components
@@ -174,18 +175,20 @@ export default function NewEvent() {
   const validateImage = (image: File[]) =>
     image.length > 0 && image.length <= 20;
 
-    const handleChange = (field: keyof FormData) => (value: string | Date | File[] | null) => {
+  const handleChange =
+    (field: keyof FormData) => (value: string | Date | File[] | null) => {
       if (field === "image") {
         setFormData((prevFormData) => ({
           ...prevFormData,
-          image: Array.isArray(value) ? [...prevFormData.image, ...value] : prevFormData.image,
+          image: Array.isArray(value)
+            ? [...prevFormData.image, ...value]
+            : prevFormData.image,
         }));
       } else {
-        setFormData(prevFormData => ({ ...prevFormData, [field]: value }));
+        setFormData((prevFormData) => ({ ...prevFormData, [field]: value }));
       }
       console.log(formData);
     };
-    
 
   const validateForm = () => {
     const errors: ValidationErrors = {
@@ -348,20 +351,25 @@ export default function NewEvent() {
           </div>
 
           <DateTimePicker
-            valueFormat="YYYY-MM-DD HH:mm:ss"
+            valueFormat="DD.MM YYYY HH:mm"
             label="Od"
             placeholder="Vyberte datum a čas začátku události"
             value={formData.from_date}
             className={classes.input}
             onChange={(date: Date | null) => handleChange("from_date")(date)}
+            minDate={new Date()}
+            locale="cs"
           />
+
           <DateTimePicker
-            valueFormat="YYYY-MM-DD HH:mm:ss"
+            valueFormat="DD.MM YYYY HH:mm"
             label="Do"
             placeholder="Vyberte datum a čas konce události"
             className={classes.input}
             value={formData.to_date}
             onChange={(date: Date | null) => handleChange("to_date")(date)}
+            minDate={formData.from_date || new Date()}
+            locale="cs"
           />
           <TextInput
             label="Místo"
