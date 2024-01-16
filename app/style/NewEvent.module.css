@@ -39,7 +39,7 @@
     color: red;
     border: 1px solid red;
   }
-  
+
   .row {
     display: flex;
     flex-direction: row;
@@ -81,3 +81,25 @@ form {
         flex-direction: column;
     }
 }
+
+.imageContainer {
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+  }
+  
+  .deleteButton {
+    position: absolute;
+    right: 1    px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: red;
+    font-size: 20px;
+    font-weight: 700;
+    background-color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+  }
+  

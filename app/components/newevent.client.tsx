@@ -35,6 +35,10 @@ type FormData = {
   location: [number, number];
 };
 
+type FormDataImg = {
+  image: File[];
+};
+
 type ValidationErrors = {
   title: string;
   description: string;
@@ -101,6 +105,9 @@ export default function NewEvent() {
     place: "",
     image: "",
   });
+  const [delimg] = useState<FormDataImg>({
+    image: [],
+  });
 
   useEffect(() => {
     const eventId = query.get("id");
@@ -130,11 +137,11 @@ export default function NewEvent() {
             if (fetchedEvent.image && fetchedEvent.image.length > 0) {
               const images = fetchedEvent.image.map((imageName: string) => {
                 const imageUrl = `http://127.0.0.1:8090/api/files/${fetchedEvent.collectionId}/${fetchedEvent.id}/${imageName}`;
-                  return fetch(imageUrl)
+                return fetch(imageUrl)
                   .then((response) => response.blob())
                   .then((blob) => new File([blob], imageName));
               });
-            
+
               Promise.all(images)
                 .then((imageFiles) => {
                   setFormData((prevData) => ({
@@ -146,8 +153,6 @@ export default function NewEvent() {
                   console.error("Error fetching images:", error);
                 });
             }
-            
-          
           } else {
             navigate("/app/home");
           }
@@ -155,10 +160,9 @@ export default function NewEvent() {
       });
     }
   }, []);
-  
 
   const validateTitle = (title: string) =>
-    title.length >= 3 && title.length <= 20;
+    title.length >= 3 && title.length <= 50;
   const validateDescription = (description: string) =>
     description.length > 0 && description.length <= 2000;
   const validateFromDate = (fromDate: Date | null) =>
@@ -170,15 +174,22 @@ export default function NewEvent() {
   const validateImage = (image: File[]) =>
     image.length > 0 && image.length <= 20;
 
-  const handleChange =
-    (field: keyof FormData) => (value: string | Date | File[] | null) => {
-      setFormData({ ...formData, [field]: value });
+    const handleChange = (field: keyof FormData) => (value: string | Date | File[] | null) => {
+      if (field === "image") {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          image: [...prevFormData.image, ...value],
+        }));
+      } else {
+        setFormData(prevFormData => ({ ...prevFormData }));
+      }
       console.log(formData);
     };
+    
 
   const validateForm = () => {
     const errors: ValidationErrors = {
-      title: validateTitle(formData.title) ? "" : "Název musí mít 3-20 znaků.",
+      title: validateTitle(formData.title) ? "" : "Název musí mít 3-50 znaků.",
       description: validateDescription(formData.description)
         ? ""
         : "Popis musí mít 1-2000 znaků.",
@@ -202,7 +213,6 @@ export default function NewEvent() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     validateForm();
-
 
     const data = new FormData();
     data.append("title", formData.title);
@@ -228,6 +238,7 @@ export default function NewEvent() {
     try {
       if (editing) {
         const eventId = query.get("id");
+        await pb.collection("events").update(eventId || "", delimg);
         const record = await pb
           .collection("events")
           .update(eventId || "", data);
@@ -283,6 +294,12 @@ export default function NewEvent() {
     }
   };
 
+  const removeImage = (index: number) => {
+    const newImages = [...formData.image];
+    newImages.splice(index, 1);
+    setFormData({ ...formData, image: newImages });
+  };
+
   return (
     <div className={classes.content}>
       <div className={classes.container}>
@@ -314,11 +331,19 @@ export default function NewEvent() {
           />
           <div className={classes.smallimages}>
             {formData.image.map((file, index) => (
-              <img
-                src={URL.createObjectURL(file)}
-                className={classes.smallimg}
-                alt={`Image ${index}`}
-              />
+              <div key={index} className={classes.imageContainer}>
+                <img
+                  src={URL.createObjectURL(file)}
+                  className={classes.smallimg}
+                  alt={`Image ${index}`}
+                />
+                <button
+                  className={classes.deleteButton}
+                  onClick={() => removeImage(index)}
+                >
+                  X
+                </button>
+              </div>
             ))}
           </div>
 
