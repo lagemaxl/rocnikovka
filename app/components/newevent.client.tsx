@@ -178,10 +178,10 @@ export default function NewEvent() {
       if (field === "image") {
         setFormData((prevFormData) => ({
           ...prevFormData,
-          image: [...prevFormData.image, ...value],
+          image: Array.isArray(value) ? [...prevFormData.image, ...value] : prevFormData.image,
         }));
       } else {
-        setFormData(prevFormData => ({ ...prevFormData }));
+        setFormData(prevFormData => ({ ...prevFormData, [field]: value }));
       }
       console.log(formData);
     };
