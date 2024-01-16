@@ -83,12 +83,12 @@ export default function NewEvent() {
   const [editing, setEditing] = useState<boolean>(false);
 
   const [formData, setFormData] = useState<FormData>({
-    title: "okokokoko",
-    description: "vbnnm",
+    title: "",
+    description: "",
     image: [],
-    from_date: new Date("2024-01-26T00:00:00+0100"),
-    to_date: new Date("2024-01-31T00:00:00+0100"),
-    place: "bnm",
+    from_date: null,
+    to_date: null,
+    place: "",
     owner: pb.authStore.model?.id || "",
     location: [50.6594, 14.0416],
   });
@@ -107,7 +107,7 @@ export default function NewEvent() {
     if (eventId) {
       getEvent(eventId).then((fetchedEvent) => {
         if (fetchedEvent) {
-          // Check if the logged-in user's ID matches the event's owner ID
+          console.log(fetchedEvent);
           const loggedInUserId = pb.authStore.model?.id;
           if (loggedInUserId && loggedInUserId === fetchedEvent.owner) {
             setEvent(fetchedEvent);
@@ -126,10 +126,30 @@ export default function NewEvent() {
               owner: fetchedEvent.owner || pb.authStore.model?.id || "",
               location: fetchedEvent.location || [50.6594, 14.0416],
             });
+
+            if (fetchedEvent.image && fetchedEvent.image.length > 0) {
+              const images = fetchedEvent.image.map((imageName: string) => {
+                const imageUrl = `http://127.0.0.1:8090/api/files/${fetchedEvent.collectionId}/${fetchedEvent.id}/${imageName}`;
+                  return fetch(imageUrl)
+                  .then((response) => response.blob())
+                  .then((blob) => new File([blob], imageName));
+              });
+            
+              Promise.all(images)
+                .then((imageFiles) => {
+                  setFormData((prevData) => ({
+                    ...prevData,
+                    image: imageFiles,
+                  }));
+                })
+                .catch((error) => {
+                  console.error("Error fetching images:", error);
+                });
+            }
+            
+          
           } else {
-            // Handle the case where the logged-in user is not the owner of the event
-            // Redirect to an appropriate page or display a message
-            navigate("/app/home"); // Redirect to the home page
+            navigate("/app/home");
           }
         }
       });
@@ -182,6 +202,7 @@ export default function NewEvent() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     validateForm();
+
 
     const data = new FormData();
     data.append("title", formData.title);

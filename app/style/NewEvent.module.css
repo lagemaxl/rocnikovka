@@ -39,6 +39,15 @@
     color: red;
     border: 1px solid red;
   }
+  
+  .row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2em;
+    width: 100%;
+  }
+  
 
 .map {
     margin-top: 1em;

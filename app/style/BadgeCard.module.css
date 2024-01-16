@@ -109,14 +109,6 @@ p {
        solid red;
     }
 
-    .row {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 2em;
-      width: 100%;
-    }
-    
     .buttonabout {
       background-color: white;
       color: black;
