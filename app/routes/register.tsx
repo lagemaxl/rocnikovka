@@ -159,8 +159,6 @@ const AuthenticationImage: React.FC = () => {
     } catch (error) {
       console.error("Registration failed", error);
     }
-
-    
   };
 
   const isValidEmail = (email: string): boolean => {
@@ -284,15 +282,15 @@ const AuthenticationImage: React.FC = () => {
 
         <div>
           <PasswordInput
-          label="Heslo:"
-          placeholder="Vaše heslo"
-          mt="md"
-          size="md"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className={passwordClasses}
-        />
+            label="Heslo:"
+            placeholder="Vaše heslo"
+            mt="md"
+            size="md"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className={passwordClasses}
+          />
 
           <Group gap={5} grow mt="xs" mb="md">
             {bars}

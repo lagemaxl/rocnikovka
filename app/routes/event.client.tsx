@@ -7,7 +7,6 @@ import "@mantine/carousel/styles.css";
 import L from "leaflet";
 import { IconMapPin, IconCalendarEvent } from "@tabler/icons-react";
 
-// Helper function to parse query parameters
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
@@ -26,10 +25,8 @@ interface Event {
 }
 
 function formatDate(dateStr: string): string {
-  // Vytvoření Date objektu z ISO řetězce
   const date = new Date(dateStr);
 
-  // Nastavení lokalizace a formátu
   const options: Intl.DateTimeFormatOptions = {
     day: "2-digit",
     month: "2-digit",
@@ -39,7 +36,6 @@ function formatDate(dateStr: string): string {
     hour12: false,
   };
 
-  // Formátování data do požadovaného formátu
   return date.toLocaleString("cs-CZ", options).replace(",", "");
 }
 
@@ -82,7 +78,7 @@ export default function EventDetails() {
     if (eventId) {
       getEvent(eventId).then(setEvent);
     } else {
-      navigate("/app/home"); // Redirect if no ID is found
+      navigate("/app/home");
     }
   }, [query]);
 
@@ -108,8 +104,8 @@ export default function EventDetails() {
   const customIcon = L.icon({
     iconUrl:
       "https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png",
-    iconSize: [32, 32], // Specify the size of your custom icon
-    iconAnchor: [16, 32], // Specify the anchor point of your custom icon
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
   });
 
   return (

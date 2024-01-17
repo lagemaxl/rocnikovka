@@ -7,10 +7,9 @@ import "@mantine/dates/styles.css";
 import "leaflet/dist/leaflet.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import L from "leaflet";
-import 'dayjs/locale/cs';
+import "dayjs/locale/cs";
 import "leaflet/dist/images/marker-shadow.png";
 
-// Dynamic imports for Leaflet components
 let MapContainer: typeof import("react-leaflet")["MapContainer"];
 let TileLayer: typeof import("react-leaflet")["TileLayer"];
 let Marker: typeof import("react-leaflet")["Marker"];
@@ -272,8 +271,8 @@ export default function NewEvent() {
     const customIcon = L.icon({
       iconUrl:
         "https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png",
-      iconSize: [32, 32], // Specify the size of your custom icon
-      iconAnchor: [16, 32], // Specify the anchor point of your custom icon
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
     });
 
     return formData.location ? (

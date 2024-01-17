@@ -1,5 +1,12 @@
-import React, { useState} from "react";
-import { Paper, TextInput, PasswordInput, Button, Title, Text } from "@mantine/core";
+import React, { useState } from "react";
+import {
+  Paper,
+  TextInput,
+  PasswordInput,
+  Button,
+  Title,
+  Text,
+} from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
 import classes from "~/style/AuthenticationImage.module.css";
 import pb from "../lib/pocketbase";
@@ -17,7 +24,10 @@ const AuthenticationImage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [isTouched, setIsTouched] = useState<TouchState>({ email: false, password: false });
+  const [isTouched, setIsTouched] = useState<TouchState>({
+    email: false,
+    password: false,
+  });
 
   const navigate = useNavigate();
 
@@ -39,10 +49,11 @@ const AuthenticationImage: React.FC = () => {
     }
 
     try {
-      const authData = await pb.collection('users').authWithPassword(email, password);
+      const authData = await pb
+        .collection("users")
+        .authWithPassword(email, password);
       console.log("Authentication Successful", authData);
       console.log(authData.token);
-      //localStorage.setItem("token", authData.token);
       navigate("/app/home");
     } catch (err) {
       if (err instanceof Error) {
@@ -53,8 +64,12 @@ const AuthenticationImage: React.FC = () => {
     }
   };
 
-  const emailClasses = `${classes.input} ${isTouched.email && (!email || !isValidEmail(email)) ? classes.error : ''}`;
-  const passwordClasses = `${classes.input} ${isTouched.password && !password ? classes.error2 : ''}`;
+  const emailClasses = `${classes.input} ${
+    isTouched.email && (!email || !isValidEmail(email)) ? classes.error : ""
+  }`;
+  const passwordClasses = `${classes.input} ${
+    isTouched.password && !password ? classes.error2 : ""
+  }`;
 
   return (
     <div className={classes.wrapper}>
@@ -63,9 +78,9 @@ const AuthenticationImage: React.FC = () => {
           Vítejte zpět
         </Title>
 
-        <TextInput 
-          label="Email:" 
-          placeholder="Váš email" 
+        <TextInput
+          label="Email:"
+          placeholder="Váš email"
           size="md"
           value={email}
           onChange={(e) => setEmail(e.currentTarget.value)}
@@ -84,7 +99,11 @@ const AuthenticationImage: React.FC = () => {
           Přihlásit se
         </Button>
 
-        {error && <Text color="red" mt="md">{error}</Text>}
+        {error && (
+          <Text color="red" mt="md">
+            {error}
+          </Text>
+        )}
 
         <Text ta="center" mt="md">
           Nemáte účet? <Link to="/register">Registrovat se</Link>
@@ -92,6 +111,6 @@ const AuthenticationImage: React.FC = () => {
       </Paper>
     </div>
   );
-}
+};
 
 export default AuthenticationImage;

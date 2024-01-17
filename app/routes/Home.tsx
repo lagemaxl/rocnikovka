@@ -69,7 +69,7 @@ export default function Home() {
   }, []);
 
   if (loading) {
-    return <div>Loading events...</div>;
+    return <div>Načítání...</div>;
   }
 
   return (
@@ -84,7 +84,9 @@ export default function Home() {
 export function EventCard({ event }: { event: Event }) {
   let imageUrls = [];
   for (let i = 0; i < event.image.length; i++) {
-      imageUrls.push(`http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[i]}`);
+    imageUrls.push(
+      `http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[i]}`
+    );
   }
   const image = `http://127.0.0.1:8090/api/files/${event.collectionId}/${event.id}/${event.image[0]}`;
   const [loading2, setLoading2] = useState<boolean>(true);
@@ -148,7 +150,7 @@ export function EventCard({ event }: { event: Event }) {
   const handleJoinEvent = async (eventId: string) => {
     setLoading2(true);
     if (isUserInEvent) {
-      data.users = eventUsers.users.filter((user) => user !== dataUser?.id); 
+      data.users = eventUsers.users.filter((user) => user !== dataUser?.id);
     } else {
       data.users = [dataUser?.id ?? "", ...eventUsers.users];
     }
@@ -168,9 +170,8 @@ export function EventCard({ event }: { event: Event }) {
     }
   };
 
-
   const handleEditEvent = async (eventId: string) => {
-    navigate(`/app/new?id=${eventId}`)
+    navigate(`/app/new?id=${eventId}`);
   };
 
   const navigate = useNavigate();
@@ -188,14 +189,13 @@ export function EventCard({ event }: { event: Event }) {
     <div className={classes.card}>
       <div className={classes.cardcontent}>
         <div className={classes.imgcontainer}>
-        {event.image.length === 1 ? (
-  <img src={image} alt="Event Image" className={classes.image} />
-) : (
-  <Carousel withIndicators height={200}>
-    {slides}
-  </Carousel>
-)}
-
+          {event.image.length === 1 ? (
+            <img src={image} alt="Event Image" className={classes.image} />
+          ) : (
+            <Carousel withIndicators height={200}>
+              {slides}
+            </Carousel>
+          )}
         </div>
         <div className={classes.info}>
           <h1>{event.title}</h1>
@@ -213,7 +213,12 @@ export function EventCard({ event }: { event: Event }) {
       </div>
       <div className={classes.buttons}>
         {isUserOwner ? (
-          <button className={classes.buttonjoin} onClick={() => handleEditEvent(event.id)}>Editovat</button>
+          <button
+            className={classes.buttonjoin}
+            onClick={() => handleEditEvent(event.id)}
+          >
+            Editovat
+          </button>
         ) : !loading2 ? (
           isUserInEvent ? (
             <button

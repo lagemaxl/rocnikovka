@@ -98,7 +98,6 @@ export default function NavbarSimple() {
     </a>
   ));
 
-
   return (
     dataUser && (
       <div className={classes.container}>
@@ -131,7 +130,11 @@ export default function NavbarSimple() {
         <div className={classes.burger}>
           <Burger opened={opened} onClick={toggle} />
         </div>
-        <div className={`${classes.appcontainer} ${opened ? classes.nodisplay : ""}`}>
+        <div
+          className={`${classes.appcontainer} ${
+            opened ? classes.nodisplay : ""
+          }`}
+        >
           <Outlet />
         </div>
       </div>
