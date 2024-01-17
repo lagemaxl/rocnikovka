@@ -162,15 +162,15 @@ export default function NewEvent() {
   }, []);
 
   const validateTitle = (title: string) =>
-    title.length >= 3 && title.length <= 50;
+    title.trim().length >= 3 && title.length <= 50;
   const validateDescription = (description: string) =>
-    description.length > 0 && description.length <= 2000;
+    description.trim().length > 0 && description.length <= 2000;
   const validateFromDate = (fromDate: Date | null) =>
     fromDate && fromDate > new Date();
   const validateToDate = (toDate: Date | null, fromDate: Date | null) =>
     toDate && fromDate && toDate > fromDate;
   const validatePlace = (place: string) =>
-    place.length >= 3 && place.length <= 20;
+    place.trim().length >= 3 && place.length <= 20;
   const validateImage = (image: File[]) =>
     image.length > 0 && image.length <= 20;
 
@@ -214,7 +214,7 @@ export default function NewEvent() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    validateForm();
+    //.validateForm();
 
     const data = new FormData();
     data.append("title", formData.title);
