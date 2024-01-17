@@ -90,7 +90,7 @@ form {
   
   .deleteButton {
     position: absolute;
-    right: 1    px;
+    right: 1px;
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -101,5 +101,6 @@ form {
     border-radius: 50%;
     width: 30px;
     height: 30px;
+    z-index: 2;
   }
   

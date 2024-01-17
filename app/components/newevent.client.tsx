@@ -238,16 +238,18 @@ export default function NewEvent() {
 
     data.append("location", JSON.stringify(formData.location));
     try {
-      if (editing) {
-        const eventId = query.get("id");
-        await pb.collection("events").update(eventId || "", delimg);
-        const record = await pb
-          .collection("events")
-          .update(eventId || "", data);
-      } else {
-        const record = await pb.collection("events").create(data);
+      if (isFormValid) {
+        if (editing) {
+          const eventId = query.get("id");
+          await pb.collection("events").update(eventId || "", delimg);
+          const record = await pb
+            .collection("events")
+            .update(eventId || "", data);
+        } else {
+          const record = await pb.collection("events").create(data);
+        }
+        navigate("/app/home");
       }
-      navigate("/app/home");
     } catch (error) {
       console.error("Failed to create event:", error);
     }
@@ -258,6 +260,11 @@ export default function NewEvent() {
       require("leaflet/dist/leaflet.css");
     }
   }, []);
+
+  useEffect(() => {
+    validateForm();
+  }, [formData]);
+  
 
   const Markers = () => {
     const map = useMapEvents({
