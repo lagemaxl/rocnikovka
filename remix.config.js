@@ -8,6 +8,7 @@ export default {
         route("new", "components/newevent.client.tsx", { index: true });
         route("event", "routes/event.client.tsx", { index: true });
         route("profile", "routes/profile.tsx", { index: true });
+        route("groups", "routes/groups.tsx", { index: true });
       });
     });
   }
