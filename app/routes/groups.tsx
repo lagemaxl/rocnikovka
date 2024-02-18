@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import classes from "~/style/Groups.module.css";
 import cx from 'clsx';
 import { Table, ScrollArea } from '@mantine/core';
+import pb from "../lib/pocketbase";
+
 
 interface Group {
   id: string;
   name: string;
   users: string[];
+  owner: string; // Property to include the ID of the group owner
 }
 
 interface User {
@@ -23,6 +26,8 @@ interface Users {
 export default function EventDetails() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [users, setUsers] = useState<Users>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -33,11 +38,15 @@ export default function EventDetails() {
           throw new Error('Failed to fetch groups');
         }
         const data: { items: Group[] } = await response.json();
-        setGroups(data.items);
-        const userIds = [...new Set(data.items.flatMap(group => group.users))];
-        userIds.forEach(fetchUserDetails);
+        
+        const ownedGroups = data.items.filter(group => group.owner === (pb.authStore.model?.id ?? ''));
+        setGroups(ownedGroups);
+        const userIds = [...new Set(ownedGroups.flatMap(group => group.users))];
+        Promise.all(userIds.map(fetchUserDetails)).then(() => setLoading(false));
       } catch (error) {
         console.error('Error fetching groups:', error);
+        setError('Error fetching groups');
+        setLoading(false);
       }
     };
 
@@ -52,6 +61,7 @@ export default function EventDetails() {
         setUsers(prev => ({ ...prev, [userId]: userDetails }));
       } catch (error) {
         console.error(`Error fetching details for user ${userId}:`, error);
+        setError(`Error fetching details for user ${userId}`);
       }
     };
 
@@ -67,9 +77,17 @@ export default function EventDetails() {
     </tr>
   ));
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   return (
-    <ScrollArea style={{ height: 300 }} onScrollPositionChange={({ y }) => setScrolled(y !== 0)}>
-      <Table style={{ minWidth: 700 }}>
+    <ScrollArea style={{ height: 300 }} onScrollPositionChange={({ y }) => setScrolled(y !== 0)} aria-label="User details">
+      <Table style={{ minWidth: 700 }} aria-label="User list">
         <thead className={cx(classes.header, { [classes.scrolled]: scrolled })}>
           <tr>
             <th>Name</th>
