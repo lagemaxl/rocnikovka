@@ -18,3 +18,12 @@
   .scrolled {
     box-shadow: var(--mantine-shadow-sm);
   }
+
+  .groups {
+    display: flex;
+    flex-direction: column;
+    gap: 5em;
+  }
+
+  .group {
+  }

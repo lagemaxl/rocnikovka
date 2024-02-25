@@ -64,6 +64,8 @@ export default function EventDetails() {
         setIsModalOpen(false);
         setNewGroupName("");
         setNewGroupEmails("");
+        const updatedGroups = [...groups, saveResponse];
+        setGroups(updatedGroups);
       } catch (error: any) {
         console.error("Error creating group:", error);
       }
@@ -117,6 +119,22 @@ export default function EventDetails() {
     fetchGroups();
   }, []);
 
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      // Assuming 'groups' is the name of your collection in PocketBase
+      await pb.collection('groups').delete(groupId);
+      console.log(`Group with ID: ${groupId} deleted successfully`);
+  
+      // Remove the deleted group from the state
+      const updatedGroups = groups.filter(group => group.id !== groupId);
+      setGroups(updatedGroups);
+    } catch (error: any) {
+      console.error("Error deleting group:", error);
+      // Optionally, handle errors (e.g., show an error message)
+    }
+  };
+  
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -129,32 +147,23 @@ export default function EventDetails() {
     return (
       <div>
         Nemáte žádné skupiny.
-        <Button
-          onClick={() => {
-            /* Navigate to create group page */
-          }}
-        >
-          Vytvořit skupinu
-        </Button>
+        <Button onClick={() => setIsModalOpen(true)}>Vytvořit skupinu</Button>
       </div>
     );
   }
 
   return (
     <>
+    <div className={classes.groups}>
       {groups.map((group) => (
-        <div key={group.id}>
+        <div key={group.id} className={classes.group}>
           <h1>{group.name}</h1>
-          <ScrollArea
-            style={{ height: 300 }}
-            aria-label={`User details for group ${group.name}`}
-          >
             <Table style={{ minWidth: 700 }} aria-label="User list">
               <thead
                 className={cx(classes.header, { [classes.scrolled]: false })}
               >
                 <tr>
-                  <th>Name</th>
+                  <th>Jméno</th>
                   <th>Email</th>
                 </tr>
               </thead>
@@ -169,9 +178,10 @@ export default function EventDetails() {
                 ))}
               </tbody>
             </Table>
-          </ScrollArea>
+            <Button color="red" onClick={() => handleDeleteGroup(group.id)}>Smazat skupinu</Button>
         </div>
       ))}
+      </div>
       <Button onClick={() => setIsModalOpen(true)}>Vytvořit skupinu</Button>
       <Modal
         opened={isModalOpen}
