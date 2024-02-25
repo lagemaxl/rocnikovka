@@ -26,4 +26,15 @@
   }
 
   .group {
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: space-between; 
+    height: 120%;
+    padding: 1em;
+  }
+
+  .group button {
+    width: 20%;
+    margin: 1em 0 1em 0;
   }

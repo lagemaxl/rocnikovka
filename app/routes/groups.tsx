@@ -1,5 +1,13 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { Modal, TextInput, Group as MantineGroup, Textarea, Table, ScrollArea, Button } from "@mantine/core";
+import {
+  Modal,
+  TextInput,
+  Group as MantineGroup,
+  Textarea,
+  Table,
+  ScrollArea,
+  Button,
+} from "@mantine/core";
 import classes from "~/style/Groups.module.css";
 import cx from "clsx";
 import pb from "../lib/pocketbase";
@@ -30,9 +38,34 @@ export default function EventDetails() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [newGroupName, setNewGroupName] = useState<string>("");
   const [newGroupEmails, setNewGroupEmails] = useState<string>("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+
+  const handleUpdateGroup = (group: Group) => {
+    setEditingGroup(group);
+    setNewGroupName(group.name);
+    // Assuming you store the user emails in the group or can fetch them based on user IDs
+    const userEmails = group.users
+      .map((userId) => users[userId]?.email)
+      .join(", ");
+    setNewGroupEmails(userEmails);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    // Use editingGroup to decide if creating or updating
+    if (editingGroup) {
+      // Logic to update the group using `pb.collection("groups").update(...)`
+      // You need to implement the logic to convert emails back to userIds if necessary
+    } else {
+      // Existing logic to create a new group
+      handleCreateGroup();
+    }
+  };
 
   const handleCreateGroup = async () => {
-    const emailArray = newGroupEmails.split(',').map(email => email.trim());
+    const emailArray = newGroupEmails.split(",").map((email) => email.trim());
     const userIds: string[] = [];
 
     for (const email of emailArray) {
@@ -40,7 +73,9 @@ export default function EventDetails() {
         // Adjust the filter to properly query for the email address
         const filter = `email = '${email}'`;
         // Use the corrected filter in your query
-        const userResponse = await pb.collection('users').getList(1, 50, {filter});
+        const userResponse = await pb
+          .collection("users")
+          .getList(1, 50, { filter });
         if (userResponse.items.length > 0) {
           userIds.push(userResponse.items[0].id);
         } else {
@@ -50,16 +85,16 @@ export default function EventDetails() {
         console.error("Error fetching user by email:", error);
       }
     }
-    
+
     if (userIds.length > 0) {
       const newGroup = {
         name: newGroupName,
         users: userIds,
         owner: pb.authStore.model?.id,
       };
-  
+
       try {
-        const saveResponse = await pb.collection('groups').create(newGroup);
+        const saveResponse = await pb.collection("groups").create(newGroup);
         console.log("Group created successfully:", saveResponse);
         setIsModalOpen(false);
         setNewGroupName("");
@@ -122,18 +157,17 @@ export default function EventDetails() {
   const handleDeleteGroup = async (groupId: string) => {
     try {
       // Assuming 'groups' is the name of your collection in PocketBase
-      await pb.collection('groups').delete(groupId);
+      await pb.collection("groups").delete(groupId);
       console.log(`Group with ID: ${groupId} deleted successfully`);
-  
+
       // Remove the deleted group from the state
-      const updatedGroups = groups.filter(group => group.id !== groupId);
+      const updatedGroups = groups.filter((group) => group.id !== groupId);
       setGroups(updatedGroups);
     } catch (error: any) {
       console.error("Error deleting group:", error);
       // Optionally, handle errors (e.g., show an error message)
     }
   };
-  
 
   if (loading) {
     return <div>Loading...</div>;
@@ -154,10 +188,10 @@ export default function EventDetails() {
 
   return (
     <>
-    <div className={classes.groups}>
-      {groups.map((group) => (
-        <div key={group.id} className={classes.group}>
-          <h1>{group.name}</h1>
+      <div className={classes.groups}>
+        {groups.map((group) => (
+          <div key={group.id} className={classes.group}>
+            <h1>{group.name}</h1>
             <Table style={{ minWidth: 700 }} aria-label="User list">
               <thead
                 className={cx(classes.header, { [classes.scrolled]: false })}
@@ -178,22 +212,26 @@ export default function EventDetails() {
                 ))}
               </tbody>
             </Table>
-            <Button color="red" onClick={() => handleDeleteGroup(group.id)}>Smazat skupinu</Button>
-        </div>
-      ))}
+            <Button color="red" onClick={() => handleDeleteGroup(group.id)}>
+              Smazat skupinu
+            </Button>
+            <Button onClick={() => handleUpdateGroup(group)}>
+              Upravit skupinu
+            </Button>
+          </div>
+        ))}
       </div>
       <Button onClick={() => setIsModalOpen(true)}>Vytvořit skupinu</Button>
+
       <Modal
-        opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Vytvořit novou skupinu"
+        opened={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingGroup(null);
+        }}
+        title={editingGroup ? "Upravit skupinu" : "Vytvořit novou skupinu"}
       >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleCreateGroup();
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <TextInput
             label="Název skupiny"
             placeholder="Zadejte název skupiny"
@@ -208,7 +246,7 @@ export default function EventDetails() {
             onChange={(e) => setNewGroupEmails(e.target.value)}
             required
           />
-          <MantineGroup position="right" mt="md">
+          <MantineGroup mt="md">
             <Button type="submit">Vytvořit</Button>
           </MantineGroup>
         </form>
