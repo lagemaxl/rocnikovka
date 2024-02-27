@@ -39,30 +39,14 @@ export default function EventDetails() {
   const [newGroupName, setNewGroupName] = useState<string>("");
   const [newGroupEmails, setNewGroupEmails] = useState<string>("");
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
-  const handleUpdateGroup = (group: Group) => {
-    setEditingGroup(group);
-    setNewGroupName(group.name);
-    // Assuming you store the user emails in the group or can fetch them based on user IDs
-    const userEmails = group.users
-      .map((userId) => users[userId]?.email)
-      .join(", ");
-    setNewGroupEmails(userEmails);
-    setIsEditModalOpen(true);
-  };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    // Use editingGroup to decide if creating or updating
-    if (editingGroup) {
-      // Logic to update the group using `pb.collection("groups").update(...)`
-      // You need to implement the logic to convert emails back to userIds if necessary
-    } else {
-      // Existing logic to create a new group
-      handleCreateGroup();
-    }
-  };
+useEffect(() => {
+  setNewGroupEmails("");
+  setNewGroupName("");
+}, [isModalOpen]);
+
 
   const handleCreateGroup = async () => {
     const emailArray = newGroupEmails.split(",").map((email) => email.trim());
@@ -99,7 +83,7 @@ export default function EventDetails() {
         setIsModalOpen(false);
         setNewGroupName("");
         setNewGroupEmails("");
-        const updatedGroups = [...groups, saveResponse];
+        const updatedGroups = [...groups, saveResponse as unknown as Group]; // Explicitly cast saveResponse as Group
         setGroups(updatedGroups);
       } catch (error: any) {
         console.error("Error creating group:", error);
@@ -108,6 +92,68 @@ export default function EventDetails() {
       console.error("No valid user IDs found for the given emails");
     }
   };
+
+
+  const handleOpenEditGroup = (group: Group) => {
+    setEditingGroup(group);
+    setIsEditModalOpen(true);
+    setNewGroupName(group.name);
+    // Assuming you store group user emails in state, you need to convert user IDs back to emails
+    // This might require fetching users or having a users' email map available
+    const groupEmails = group.users.map(userId => users[userId]?.email).join(", ");
+    setNewGroupEmails(groupEmails);
+  };
+
+  
+  const handleUpdateGroup = async () => {
+    if (!editingGroup) return; // Ensure there is a group being edited
+  
+    const emailArray = newGroupEmails.split(",").map(email => email.trim());
+    // Transform emails back to userIds, similar to handleCreateGroup
+    const userIds: string[] = [];
+
+    for (const email of emailArray) {
+      try {
+        // Adjust the filter to properly query for the email address
+        const filter = `email = '${email}'`;
+        // Use the corrected filter in your query
+        const userResponse = await pb
+          .collection("users")
+          .getList(1, 50, { filter });
+        if (userResponse.items.length > 0) {
+          userIds.push(userResponse.items[0].id);
+        } else {
+          console.warn(`No user found for email: ${email}`);
+        }
+      } catch (error: any) {
+        console.error("Error fetching user by email:", error);
+      }
+    }
+
+  
+    const updatedGroup = {
+      ...editingGroup,
+      name: newGroupName,
+      users: userIds,
+    };
+  
+    try {
+      // Assuming you have an API or method to update a group
+      await pb.collection("groups").update(editingGroup.id, updatedGroup);
+      console.log("Group updated successfully");
+  
+      // Update groups state with the updated group details
+      setGroups(groups.map(group => group.id === editingGroup.id ? updatedGroup : group));
+      setIsEditModalOpen(false); // Close the modal
+      // Reset editing state
+      setEditingGroup(null);
+      setNewGroupName("");
+      setNewGroupEmails("");
+    } catch (error) {
+      console.error("Error updating group:", error);
+    }
+  };
+  
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -177,17 +223,13 @@ export default function EventDetails() {
     return <div>{error}</div>;
   }
 
-  if (groups.length === 0) {
-    return (
-      <div>
-        Nemáte žádné skupiny.
-        <Button onClick={() => setIsModalOpen(true)}>Vytvořit skupinu</Button>
-      </div>
-    );
-  }
-
   return (
     <>
+      {groups.length === 0 && (
+        <div>
+          Nemáte žádné skupiny.
+        </div>
+      )}
       <div className={classes.groups}>
         {groups.map((group) => (
           <div key={group.id} className={classes.group}>
@@ -215,23 +257,23 @@ export default function EventDetails() {
             <Button color="red" onClick={() => handleDeleteGroup(group.id)}>
               Smazat skupinu
             </Button>
-            <Button onClick={() => handleUpdateGroup(group)}>
-              Upravit skupinu
-            </Button>
+            <Button onClick={() => handleOpenEditGroup(group)}>Upravit skupinu</Button>
+
           </div>
         ))}
       </div>
-      <Button onClick={() => setIsModalOpen(true)}>Vytvořit skupinu</Button>
-
+      <Button onClick={() => { setNewGroupName(""); setNewGroupEmails(""); setIsModalOpen(true);}}>Vytvořit skupinu</Button>
       <Modal
-        opened={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingGroup(null);
-        }}
-        title={editingGroup ? "Upravit skupinu" : "Vytvořit novou skupinu"}
+        opened={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Vytvořit novou skupinu"
       >
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateGroup();
+          }}
+        >
           <TextInput
             label="Název skupiny"
             placeholder="Zadejte název skupiny"
@@ -248,6 +290,37 @@ export default function EventDetails() {
           />
           <MantineGroup mt="md">
             <Button type="submit">Vytvořit</Button>
+          </MantineGroup>
+        </form>
+      </Modal>
+
+      <Modal
+        opened={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Upravit skupinu"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleUpdateGroup();
+          }}
+        >
+          <TextInput
+            label="Název skupiny"
+            placeholder="Zadejte název skupiny"
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+            required
+          />
+          <Textarea
+            label="Emaily členů"
+            placeholder="Zadejte emaily, oddělené čárkou"
+            value={newGroupEmails}
+            onChange={(e) => setNewGroupEmails(e.target.value)}
+            required
+          />
+          <MantineGroup mt="md">
+            <Button type="submit">Uložit</Button>
           </MantineGroup>
         </form>
       </Modal>
