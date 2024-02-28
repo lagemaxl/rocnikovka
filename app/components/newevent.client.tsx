@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
-import { TextInput, Textarea, FileInput, Button } from "@mantine/core";
+import { TextInput, Textarea, FileInput, Button, Switch } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import classes from "~/style/NewEvent.module.css";
 import pb from "../lib/pocketbase";
@@ -9,6 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import L from "leaflet";
 import "dayjs/locale/cs";
 import "leaflet/dist/images/marker-shadow.png";
+import { Autocomplete } from "@mantine/core";
 
 let MapContainer: typeof import("react-leaflet")["MapContainer"];
 let TileLayer: typeof import("react-leaflet")["TileLayer"];
@@ -33,6 +34,8 @@ type FormData = {
   place: string;
   owner: string;
   location: [number, number];
+  private: boolean;
+  group: string;
 };
 
 type FormDataImg = {
@@ -49,6 +52,8 @@ type ValidationErrors = {
 };
 
 type Event = {
+  group: string;
+  private: boolean;
   title: string;
   description: string;
   image: string;
@@ -85,6 +90,8 @@ export default function NewEvent() {
   const query = useQuery();
   const [event, setEvent] = useState<Event | null>(null);
   const [editing, setEditing] = useState<boolean>(false);
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState("");
 
   const [formData, setFormData] = useState<FormData>({
     title: "",
@@ -95,6 +102,8 @@ export default function NewEvent() {
     place: "",
     owner: pb.authStore.model?.id || "",
     location: [50.6594, 14.0416],
+    private: false,
+    group: "",
   });
   const [isFormValid, setIsFormValid] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({
@@ -132,6 +141,8 @@ export default function NewEvent() {
               place: fetchedEvent.place || "",
               owner: fetchedEvent.owner || pb.authStore.model?.id || "",
               location: fetchedEvent.location || [50.6594, 14.0416],
+              private: fetchedEvent.private || false,
+              group: fetchedEvent.group || "",
             });
 
             if (fetchedEvent.image && fetchedEvent.image.length > 0) {
@@ -160,6 +171,10 @@ export default function NewEvent() {
       });
     }
   }, []);
+
+  const handlePrivacyChange = (isPrivate: boolean) => {
+    setFormData((prevFormData) => ({ ...prevFormData, private: isPrivate }));
+  };
 
   const validateTitle = (title: string) =>
     title.trim().length >= 3 && title.length <= 50;
@@ -237,6 +252,10 @@ export default function NewEvent() {
     }
 
     data.append("location", JSON.stringify(formData.location));
+
+    data.append("private", formData.private.toString());
+
+    data.append("group", selectedGroup);
     try {
       if (isFormValid) {
         if (editing) {
@@ -264,7 +283,6 @@ export default function NewEvent() {
   useEffect(() => {
     validateForm();
   }, [formData]);
-  
 
   const Markers = () => {
     const map = useMapEvents({
@@ -308,6 +326,33 @@ export default function NewEvent() {
     newImages.splice(index, 1);
     setFormData({ ...formData, image: newImages });
   };
+
+  useEffect(() => {
+    if (formData.private) {
+      // Fetch private groups or filter your groups data to show only private groups
+    } else {
+      // Fetch public groups or adjust your groups data accordingly
+    }
+  }, [formData.private]); // Re-fetch or filter groups when the privacy status changes
+
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        if (formData.private) {
+          const response =  await pb
+          .collection("groups").getList(1, 50);
+          const groupNames = response.items.map((record) => record.name);
+          console.log(groupNames);
+          setGroups(groupNames);
+        }
+      } catch (error) {
+        console.error("Failed to fetch groups:", error);
+      }
+    };
+
+    fetchGroups();
+  }, [formData.private]);
 
   return (
     <div className={classes.content}>
@@ -386,6 +431,26 @@ export default function NewEvent() {
               handleChange("place")(event.currentTarget.value)
             }
           />
+
+          <Switch
+            label="Soukromá akce"
+            checked={formData.private}
+            onChange={(event) =>
+              handlePrivacyChange(event.currentTarget.checked)
+            }
+          />
+
+          {formData.private && (
+            <Autocomplete
+              label="Vyberte skupinu"
+              placeholder="Začněte psát název skupiny"
+              data={groups}
+              value={selectedGroup}
+              onChange={setSelectedGroup}
+              className={classes.input}
+            />
+          )}
+
           {editing ? (
             <div className={classes.row}>
               <Button
