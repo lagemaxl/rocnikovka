@@ -50,12 +50,21 @@ async function getEvents(): Promise<Event[]> {
       throw new Error(`Error: ${res.status}`);
     }
     const data = await res.json();
-    return data?.items || [];
+    
+    // Filter out private events and events where the current user is not in the 'users' array
+    const filteredEvents = data?.items.filter(event => 
+      (!event.private || event.owner === pb?.authStore?.model?.id || 
+      event.group.users.includes(pb?.authStore?.model?.id)
+    )) || [];
+    
+    console.log("Fetched events:", filteredEvents);
+    return filteredEvents;
   } catch (error) {
     console.error("Failed to fetch events:", error);
     return [];
   }
 }
+
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);

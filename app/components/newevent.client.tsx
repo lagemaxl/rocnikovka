@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { TextInput, Textarea, FileInput, Button, Switch } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import classes from "~/style/NewEvent.module.css";
@@ -10,20 +10,12 @@ import L from "leaflet";
 import "dayjs/locale/cs";
 import "leaflet/dist/images/marker-shadow.png";
 import { Autocomplete } from "@mantine/core";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
-let MapContainer: typeof import("react-leaflet")["MapContainer"];
-let TileLayer: typeof import("react-leaflet")["TileLayer"];
-let Marker: typeof import("react-leaflet")["Marker"];
-let useMapEvents: typeof import("react-leaflet")["useMapEvents"];
-
-if (typeof window !== "undefined") {
-  const leaflet = require("react-leaflet");
-  MapContainer = leaflet.MapContainer;
-  TileLayer = leaflet.TileLayer;
-  Marker = leaflet.Marker;
-  useMapEvents = leaflet.useMapEvents;
-  require("leaflet/dist/leaflet.css");
-}
+type Group = {
+  id: string;
+  name: string;
+};
 
 type FormData = {
   title: string;
@@ -35,7 +27,7 @@ type FormData = {
   owner: string;
   location: [number, number];
   private: boolean;
-  group: string;
+  group: Group | null;
 };
 
 type FormDataImg = {
@@ -90,8 +82,8 @@ export default function NewEvent() {
   const query = useQuery();
   const [event, setEvent] = useState<Event | null>(null);
   const [editing, setEditing] = useState<boolean>(false);
-  const [groups, setGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState("");
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     title: "",
@@ -103,7 +95,7 @@ export default function NewEvent() {
     owner: pb.authStore.model?.id || "",
     location: [50.6594, 14.0416],
     private: false,
-    group: "",
+    group: null,
   });
   const [isFormValid, setIsFormValid] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({
@@ -142,8 +134,10 @@ export default function NewEvent() {
               owner: fetchedEvent.owner || pb.authStore.model?.id || "",
               location: fetchedEvent.location || [50.6594, 14.0416],
               private: fetchedEvent.private || false,
-              group: fetchedEvent.group || "",
+              group: fetchedEvent.group || null,
             });
+
+            setSelectedGroup(fetchedEvent.group || null);
 
             if (fetchedEvent.image && fetchedEvent.image.length > 0) {
               const images = fetchedEvent.image.map((imageName: string) => {
@@ -190,7 +184,8 @@ export default function NewEvent() {
     image.length > 0 && image.length <= 20;
 
   const handleChange =
-    (field: keyof FormData) => (value: string | Date | File[] | null) => {
+    (field: keyof FormData) =>
+    (value: string | Date | File[] | null | boolean) => {
       if (field === "image") {
         setFormData((prevFormData) => ({
           ...prevFormData,
@@ -227,9 +222,8 @@ export default function NewEvent() {
     setIsFormValid(isValid);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //.validateForm();
 
     const data = new FormData();
     data.append("title", formData.title);
@@ -255,7 +249,7 @@ export default function NewEvent() {
 
     data.append("private", formData.private.toString());
 
-    data.append("group", selectedGroup);
+    data.append("group", JSON.stringify(selectedGroup));
     try {
       if (isFormValid) {
         if (editing) {
@@ -335,24 +329,29 @@ export default function NewEvent() {
     }
   }, [formData.private]); // Re-fetch or filter groups when the privacy status changes
 
-
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        if (formData.private) {
-          const response =  await pb
-          .collection("groups").getList(1, 50);
-          const groupNames = response.items.map((record) => record.name);
-          console.log(groupNames);
-          setGroups(groupNames);
+    if (formData.private) {
+      const fetchGroups = async () => {
+        try {
+          if (formData.private) {
+            const response = await pb.collection("groups").getList(1, 50);
+            // Assuming response.items contain a similar structure to { items: Group[] }
+            // and there's a way to get the current user's ID similar to pb.authStore.model?.id
+            const ownedGroups = response.items.filter(
+              (group) => group.owner === (pb.authStore.model?.id ?? "")
+            );
+            console.log(ownedGroups);
+            setGroups(ownedGroups);
+          }
+        } catch (error) {
+          console.error("Failed to fetch groups:", error);
         }
-      } catch (error) {
-        console.error("Failed to fetch groups:", error);
-      }
-    };
-
-    fetchGroups();
+      };
+  
+      fetchGroups();
+    }
   }, [formData.private]);
+  
 
   return (
     <div className={classes.content}>
@@ -440,14 +439,17 @@ export default function NewEvent() {
             }
           />
 
-          {formData.private && (
+          {formData.private && groups && (
             <Autocomplete
               label="Vyberte skupinu"
               placeholder="Začněte psát název skupiny"
-              data={groups}
-              value={selectedGroup}
-              onChange={setSelectedGroup}
-              className={classes.input}
+              value={selectedGroup ? selectedGroup.name : ""}
+              onChange={(value) => {
+                // Find the group object by name
+                const group = groups.find((group) => group.name === value);
+                setSelectedGroup(group || null);
+              }}
+              data={groups.map((group) => group.name)}
             />
           )}
 
